@@ -1,0 +1,52 @@
+name: MyCampusOS CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # Job 1: Build & Verify Backend Node.js Service
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'server/package-lock.json'
+
+      - name: Install Server Dependencies
+        run: npm ci
+        working-directory: ./server
+
+      - name: Run Backend Unit Tests
+        run: node test_ai_refinement.js
+        working-directory: ./server
+
+  # Job 2: Build & Verify React Frontend Client
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'client/package-lock.json'
+
+      - name: Install Client Dependencies
+        run: npm ci
+        working-directory: ./client
+
+      - name: Compile Client Build
+        run: npm run build
+        working-directory: ./client

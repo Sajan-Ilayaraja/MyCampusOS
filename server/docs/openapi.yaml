@@ -1,0 +1,99 @@
+openapi: 3.0.0
+info:
+  title: MyCampusOS API Specifications
+  description: API Documentation mapping security models, coursework tracking, placement kanbans, and Gemini AI features.
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+    description: Local development backend server
+  - url: https://mycampusos-api.onrender.com/api
+    description: Production deployment server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new student user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string }
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '201':
+          description: User registered successfully
+
+  /auth/login:
+    post:
+      summary: Student authentication login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: User authenticated, returns JWT token
+
+  /health:
+    get:
+      summary: Server health check status
+      security: []
+      responses:
+        '200':
+          description: Server and database healthy
+
+  /tasks:
+    get:
+      summary: Retrieve paginated tasks
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 100 }
+        - name: priority
+          in: query
+          schema: { type: string, enum: [low, medium, high] }
+      responses:
+        '200':
+          description: List of task records
+
+  /ai/study-plan:
+    post:
+      summary: Generate study timetable revisions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, examDate, topics]
+              properties:
+                subject: { type: string }
+                examDate: { type: string }
+                topics: { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Timetable plan payload

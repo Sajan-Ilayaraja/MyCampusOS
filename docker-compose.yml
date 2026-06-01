@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # MongoDB production container base
+  mongodb:
+    image: mongo:latest
+    container_name: mycampusos-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - campus-network
+
+  # Node Express backend container
+  backend:
+    build: ./server
+    container_name: mycampusos-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongodb:27017/mycampusos
+      - JWT_SECRET=ProductionSuperSecretKeyChangeMePlease
+      - GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
+      - PORT=5000
+    depends_on:
+      - mongodb
+    networks:
+      - campus-network
+
+  # React Vite frontend container (served via Nginx)
+  frontend:
+    build: ./client
+    container_name: mycampusos-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - campus-network
+
+volumes:
+  mongo-data:
+
+networks:
+  campus-network:
+    driver: bridge
