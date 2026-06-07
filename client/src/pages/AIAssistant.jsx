@@ -7,6 +7,13 @@ import API from '../services/api';
 import toast from 'react-hot-toast';
 import ErrorBoundary from '../components/ErrorBoundary';
 import SEO from '../components/SEO';
+import { 
+  StudyPlanSkeleton, 
+  NotesSummarySkeleton, 
+  FlashcardSkeleton, 
+  CareerAdvisorSkeleton,
+  QuizSkeleton
+} from '../components/SkeletonLoaders';
 import {
   Sparkles,
   BookOpen,
@@ -2996,18 +3003,26 @@ const AIAssistant = () => {
 
                         {/* Loading Skeletal */}
                         {chatLoading && chatHistory[chatHistory.length - 1]?.content === '' && (
-                          <div className="flex items-start gap-3.5 text-xs justify-start">
-                            <div className="w-8 h-8 rounded-xl bg-indigo-650 border border-indigo-500/20 flex items-center justify-center font-bold text-white shrink-0 animate-pulse">
-                              CB
+                          <div className="flex items-start gap-3.5 text-xs justify-start select-none">
+                            {/* AI Pulse Avatar */}
+                            <div className="relative w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center font-bold text-white shrink-0 shadow-lg shadow-indigo-500/20">
+                              <div className="absolute inset-0 rounded-xl bg-indigo-500/50 animate-ping opacity-75"></div>
+                              <Bot className="w-4.5 h-4.5 z-10" />
                             </div>
-                            <div className="bg-slate-900/40 border border-slate-850 text-slate-400 p-4 rounded-2xl rounded-tl-none flex flex-col gap-2 max-w-[300px] w-full shadow backdrop-blur">
-                              <div className="flex items-center gap-1.5 font-semibold text-indigo-400 mb-1">
-                                <Loader className="w-3.5 h-3.5 animate-spin" />
-                                <span>Thinking...</span>
+                            <div className="bg-slate-900/40 border border-slate-850/80 text-slate-350 p-4 rounded-2xl rounded-tl-none flex flex-col gap-2.5 max-w-[320px] w-full shadow-2xl backdrop-blur-xl">
+                              <div className="flex items-center gap-2 text-indigo-400 font-semibold tracking-wide text-[10px] uppercase">
+                                <div className="flex space-x-1 items-center h-2.5">
+                                  <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                  <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                  <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                </div>
+                                <span>CampusBuddy is thinking...</span>
                               </div>
-                              <div className="h-2 w-full bg-slate-800 rounded animate-pulse" />
-                              <div className="h-2 w-5/6 bg-slate-800 rounded animate-pulse" />
-                              <div className="h-2 w-2/3 bg-slate-800 rounded animate-pulse" />
+                              <div className="space-y-2">
+                                <div className="h-2 bg-slate-800/60 rounded-full w-full animate-pulse" />
+                                <div className="h-2 bg-slate-800/60 rounded-full w-[90%] animate-pulse" style={{ animationDelay: '150ms' }} />
+                                <div className="h-2 bg-slate-800/60 rounded-full w-[70%] animate-pulse" style={{ animationDelay: '300ms' }} />
+                              </div>
                             </div>
                           </div>
                         )}
@@ -3181,20 +3196,7 @@ const AIAssistant = () => {
                     {/* Output Schedule Panel */}
                     <div className="lg:col-span-8 space-y-4">
                       {planLoading && (
-                        <div className="bg-[#0a0f1e]/40 border border-slate-850 p-6 rounded-2xl space-y-4 animate-pulse">
-                          <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
-                            <Loader className="w-3.5 h-3.5 animate-spin" />
-                            <span>Building plan structure...</span>
-                          </h4>
-                          <div className="space-y-2">
-                            <div className="h-4 w-full bg-slate-900 rounded" />
-                            <div className="h-4 w-5/6 bg-slate-900 rounded" />
-                            <div className="h-4 w-4/5 bg-slate-900 rounded" />
-                          </div>
-                          <div className="pt-4 font-mono text-[10px] text-slate-500 whitespace-pre-wrap truncate h-40">
-                            {plannerStreamText}
-                          </div>
-                        </div>
+                        <StudyPlanSkeleton streamText={plannerStreamText} />
                       )}
 
                       {!generatedPlan && !planLoading && (
@@ -3338,19 +3340,7 @@ const AIAssistant = () => {
                     {/* Output summaries view */}
                     <div className="lg:col-span-7 space-y-5 select-text">
                       {noteLoading && (
-                        <div className="bg-[#0a0f1e]/40 border border-slate-850 p-6 rounded-2xl space-y-4 animate-pulse">
-                          <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
-                            <Loader className="w-3.5 h-3.5 animate-spin" />
-                            <span>Compiling notes takeaways...</span>
-                          </h4>
-                          <div className="space-y-2">
-                            <div className="h-4 w-full bg-slate-900 rounded" />
-                            <div className="h-4 w-5/6 bg-slate-900 rounded" />
-                          </div>
-                          <div className="pt-4 font-mono text-[10px] text-slate-500 whitespace-pre-wrap truncate h-40">
-                            {notesStreamText}
-                          </div>
-                        </div>
+                        <NotesSummarySkeleton streamText={notesStreamText} />
                       )}
 
                       {!noteSummaryData && !noteLoading && (
@@ -3564,30 +3554,8 @@ const AIAssistant = () => {
                       </div>
                     )}
 
-                    {/* Generating loader skeleton */}
                     {quizLoading && (
-                      <div className="bg-[#0a0f1e]/60 border border-slate-850 p-6 rounded-3xl space-y-6 max-w-lg mx-auto animate-pulse">
-                        <div className="flex justify-between items-center pb-3 border-b border-slate-850">
-                          <div className="h-4 bg-slate-800 rounded w-1/4"></div>
-                          <div className="h-4 bg-slate-800 rounded w-1/6"></div>
-                        </div>
-                        <div className="space-y-3">
-                          <div className="h-4 bg-slate-800 rounded w-3/4"></div>
-                          <div className="h-4 bg-slate-800 rounded w-1/2"></div>
-                        </div>
-                        <div className="space-y-3 pt-4">
-                          {[1, 2, 3, 4].map(idx => (
-                            <div key={idx} className="h-10 bg-slate-900 border border-slate-850/60 rounded-xl w-full"></div>
-                          ))}
-                        </div>
-                        <div className="flex justify-between items-center pt-4">
-                          <div className="h-8 bg-slate-800 rounded-xl w-1/4"></div>
-                          <div className="h-8 bg-slate-850 rounded-xl w-1/4"></div>
-                        </div>
-                        <div className="text-center text-slate-500 text-[10px] uppercase font-bold tracking-wider pt-2">
-                          CampusBuddy is compiling custom questions...
-                        </div>
-                      </div>
+                      <QuizSkeleton />
                     )}
 
                     {/* Quiz generation error block */}
@@ -3850,15 +3818,9 @@ const AIAssistant = () => {
                     )}
 
                     {/* Loader */}
-                    {fcLoading && (
-                      <div className="bg-[#0a0f1e]/60 border border-slate-850 p-8 rounded-3xl space-y-4 max-w-lg mx-auto animate-pulse text-center">
-                        <Loader className="w-10 h-10 animate-spin text-indigo-400 mx-auto" />
-                        <div className="space-y-1">
-                          <h4 className="text-sm font-bold text-white">Compiling Deck...</h4>
-                          <p className="text-slate-500 text-xs">Formulating spaced repetition card decks structure...</p>
-                        </div>
-                      </div>
-                    )}
+                      {fcLoading && (
+                        <FlashcardSkeleton />
+                      )}
 
                     {/* Active Flashcard Study Card */}
                     {fcData && (
@@ -3971,19 +3933,7 @@ const AIAssistant = () => {
                     {/* Output advisor panels */}
                     <div className="lg:col-span-8 space-y-5 select-text">
                       {careerLoading && (
-                        <div className="bg-[#0a0f1e]/40 border border-slate-850 p-6 rounded-2xl space-y-4 animate-pulse">
-                          <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
-                            <Loader className="w-3.5 h-3.5 animate-spin" />
-                            <span>Compiling ATS resume tips and interview strategies...</span>
-                          </h4>
-                          <div className="space-y-2">
-                            <div className="h-4 w-full bg-slate-900 rounded" />
-                            <div className="h-4 w-5/6 bg-slate-900 rounded" />
-                          </div>
-                          <div className="pt-4 font-mono text-[10px] text-slate-500 whitespace-pre-wrap truncate h-40">
-                            {careerStreamText}
-                          </div>
-                        </div>
+                        <CareerAdvisorSkeleton streamText={careerStreamText} />
                       )}
 
                       {!careerAdvice && !careerLoading && (

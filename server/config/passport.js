@@ -20,6 +20,7 @@ passport.use(
         let user = await User.findOne({ email });
 
         if (user) {
+          console.log(`[Passport Google Strategy] User found: ${email}`);
           let modified = false;
           if (user.provider !== 'google') {
             user.provider = 'google';
@@ -42,6 +43,7 @@ passport.use(
           return done(null, user);
         }
 
+        console.log(`[Passport Google Strategy] User not found. Creating Google user: ${email}`);
         const googlePhoto = profile.photos && profile.photos[0] ? profile.photos[0].value : '';
         user = await User.create({
           name: profile.displayName,
@@ -50,6 +52,7 @@ passport.use(
           avatar: googlePhoto,
           provider: 'google',
         });
+        console.log(`[Passport Google Strategy] User created: ${email}`);
 
         return done(null, user);
       } catch (err) {

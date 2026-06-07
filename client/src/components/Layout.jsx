@@ -298,7 +298,9 @@ const Layout = () => {
 
         {/* Page Content viewport */}
         <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto scroll-momentum safe-pb">
-          <Outlet />
+          <div key={location.pathname} className="animate-route-transition">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

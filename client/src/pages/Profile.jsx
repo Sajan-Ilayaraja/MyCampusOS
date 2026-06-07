@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import API from '../services/api';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
+import { ProfileSkeleton } from '../components/SkeletonLoaders';
 import {
   User,
   Mail,
@@ -154,6 +155,56 @@ const Profile = () => {
     }
   };
 
+  // Password complexity and strength logic
+  const newPassword = passwords.newPassword || '';
+
+  const getStrength = (pwd) => {
+    if (!pwd) return { label: '', colorClass: '', barWidth: '0%', barColor: '' };
+    
+    let score = 0;
+    const checks = {
+      length: pwd.length >= 8,
+      upper: /[A-Z]/.test(pwd),
+      lower: /[a-z]/.test(pwd),
+      number: /[0-9]/.test(pwd),
+      special: /[^A-Za-z0-9]/.test(pwd)
+    };
+    
+    if (checks.length) score++;
+    if (checks.upper) score++;
+    if (checks.lower) score++;
+    if (checks.number) score++;
+    if (checks.special) score++;
+    
+    const allMet = score === 5;
+    
+    if (allMet && pwd.length >= 14) {
+      return { label: 'Very Strong', colorClass: 'text-green-400', barWidth: '100%', barColor: 'bg-green-500' };
+    } else if (allMet) {
+      return { label: 'Strong', colorClass: 'text-yellow-400', barWidth: '75%', barColor: 'bg-yellow-400' };
+    } else if (score >= 4) {
+      return { label: 'Medium', colorClass: 'text-orange-400', barWidth: '50%', barColor: 'bg-orange-500' };
+    } else {
+      return { label: 'Weak', colorClass: 'text-red-400', barWidth: '25%', barColor: 'bg-red-500' };
+    }
+  };
+
+  const criteria = [
+    { label: 'At least 8 characters', met: newPassword.length >= 8 },
+    { label: 'One uppercase letter', met: /[A-Z]/.test(newPassword) },
+    { label: 'One lowercase letter', met: /[a-z]/.test(newPassword) },
+    { label: 'One number', met: /[0-9]/.test(newPassword) },
+    { label: 'One special character', met: /[^A-Za-z0-9]/.test(newPassword) }
+  ];
+
+  const strength = getStrength(newPassword);
+  const allMet = criteria.every(c => c.met);
+  const isPasswordFormValid = 
+    newPassword && 
+    allMet && 
+    passwords.confirmPassword === newPassword && 
+    (user?.provider !== 'local' || passwords.currentPassword);
+
   // Change password handler
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -161,8 +212,8 @@ const Profile = () => {
       toast.error('Current password is required');
       return;
     }
-    if (passwords.newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters');
+    if (!allMet) {
+      toast.error('Password does not meet the complexity requirements');
       return;
     }
     if (passwords.newPassword !== passwords.confirmPassword) {
@@ -343,6 +394,15 @@ const Profile = () => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
+
+  if (loadingStats) {
+    return (
+      <div className="space-y-6">
+        <SEO title="User Profile Center" description="Loading profile..." />
+        <ProfileSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -530,11 +590,47 @@ const Profile = () => {
                 <label className="text-[10px] font-bold text-slate-400 uppercase">New Password</label>
                 <input
                   type="password"
-                  placeholder="At least 6 characters"
+                  placeholder="At least 8 characters"
                   value={passwords.newPassword}
                   onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
                   className="w-full bg-[#131b2e]/40 border border-slate-800 rounded-xl py-2 px-3 text-slate-200 text-xs focus:border-indigo-500 outline-none transition-all"
                 />
+                
+                {/* Real-time Password Strength and Checklist */}
+                {passwords.newPassword && (
+                  <div className="mt-2.5 space-y-2 p-3 bg-slate-950/40 border border-slate-900 rounded-2xl transition-all duration-300">
+                    <div className="flex justify-between items-center text-[10px]">
+                      <span className="text-slate-500 font-medium">Password Strength:</span>
+                      <span className={`font-bold uppercase tracking-wider text-[9px] transition-colors duration-200 ${strength.colorClass}`}>
+                        {strength.label}
+                      </span>
+                    </div>
+                    <div className="h-1 w-full bg-slate-900 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full transition-all duration-300 ${strength.barColor}`} 
+                        style={{ width: strength.barWidth }}
+                      />
+                    </div>
+                    
+                    {/* Criteria Checklist */}
+                    <div className="grid grid-cols-1 gap-1.5 pt-1.5 border-t border-slate-900/60">
+                      {criteria.map((c, i) => (
+                        <div key={i} className="flex items-center gap-1.5 text-[11px]">
+                          <span className={`transition-all duration-200 p-0.5 rounded-full ${
+                            c.met ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+                          }`}>
+                            {c.met ? <Check className="w-2.5 h-2.5" /> : <X className="w-2.5 h-2.5" />}
+                          </span>
+                          <span className={`transition-all duration-200 ${
+                            c.met ? 'text-slate-300 line-through decoration-slate-700/40' : 'text-slate-400'
+                          }`}>
+                            {c.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -546,12 +642,15 @@ const Profile = () => {
                   onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
                   className="w-full bg-[#131b2e]/40 border border-slate-800 rounded-xl py-2 px-3 text-slate-200 text-xs focus:border-indigo-500 outline-none transition-all"
                 />
+                {passwords.confirmPassword && passwords.newPassword !== passwords.confirmPassword && (
+                  <p className="mt-1 text-[10px] text-red-400">Passwords do not match</p>
+                )}
               </div>
 
               <button
                 type="submit"
-                disabled={isChangingPassword}
-                className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-[0.98] disabled:opacity-50"
+                disabled={isChangingPassword || !isPasswordFormValid}
+                className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isChangingPassword ? 'Saving Password...' : 'Save Password'}
               </button>

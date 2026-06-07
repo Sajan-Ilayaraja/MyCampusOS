@@ -27,6 +27,8 @@ import {
   FolderOpen
 } from 'lucide-react';
 
+import { GoalSkeleton } from '../components/SkeletonLoaders';
+
 const GoalTracker = () => {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -665,10 +667,7 @@ const GoalTracker = () => {
 
         {/* Main Columns sections */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24">
-            <div className="w-10 h-10 border-4 border-slate-850 border-t-rose-500 rounded-full animate-spin"></div>
-            <p className="mt-3 text-slate-400 text-sm">Loading goal records...</p>
-          </div>
+          <GoalSkeleton />
         ) : goals.length === 0 ? (
           <div className="bg-[#0a0f1d]/40 border border-slate-850/80 rounded-2xl p-16 text-center max-w-xl mx-auto">
             <div className="flex justify-center mb-4 text-slate-600">

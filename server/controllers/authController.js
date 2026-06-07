@@ -3,9 +3,11 @@ const User = require('../models/User');
 
 // Helper function to generate JWT
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
+  console.log(`[Auth Controller] JWT generated for user ID: ${id}`);
+  return token;
 };
 
 // @desc    Register a new user
@@ -20,8 +22,17 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide all fields' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    const hasMinLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasDigit = /[0-9]/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+    if (!hasMinLength || !hasUpper || !hasLower || !hasDigit || !hasSpecial) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.' 
+      });
     }
 
     // Check if user already exists
@@ -123,6 +134,7 @@ const googleOAuthCallback = (err, user, req, res) => {
     return res.redirect(`${clientUrl}/login?error=oauth_failed`);
   }
   const token = generateToken(user._id);
+  console.log(`[Auth Controller] OAuth success. Redirecting user: ${user.email}`);
   return res.redirect(`${clientUrl}/oauth-success?token=${token}`);
 };
 
@@ -186,17 +198,24 @@ const updateProfile = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error, failed to update profile' });
   }
 };
-
 const updatePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Please provide current and new password' });
+    if (!newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide a new password' });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long' });
+    const hasMinLength = newPassword.length >= 8;
+    const hasUpper = /[A-Z]/.test(newPassword);
+    const hasLower = /[a-z]/.test(newPassword);
+    const hasDigit = /[0-9]/.test(newPassword);
+    const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+
+    if (!hasMinLength || !hasUpper || !hasLower || !hasDigit || !hasSpecial) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'New password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.' 
+      });
     }
 
     const user = await User.findById(req.user._id).select('+password');
@@ -205,6 +224,9 @@ const updatePassword = async (req, res) => {
     }
 
     if (user.password) {
+      if (!currentPassword) {
+        return res.status(400).json({ success: false, message: 'Please provide current password' });
+      }
       const isMatch = await user.matchPassword(currentPassword);
       if (!isMatch) {
         return res.status(400).json({ success: false, message: 'Incorrect current password' });

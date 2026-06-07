@@ -1,10 +1,11 @@
-import React, { lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
+import GlobalAppLoader from './components/GlobalAppLoader';
 
 // Lazy load pages for bundle optimization & chunk splitting (Item 4)
 const Login = lazy(() => import('./pages/Login'));
@@ -20,8 +21,26 @@ const OAuthSuccess = lazy(() => import('./pages/OAuthSuccess'));
 const Profile = lazy(() => import('./pages/Profile'));
 
 function App() {
+  const [showEntryLoader, setShowEntryLoader] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    // Show entry loader for 2.5s to display the premium logo reveal and messaging transition
+    const timer = setTimeout(() => {
+      setFadeOut(true);
+      const removeTimer = setTimeout(() => {
+        setShowEntryLoader(false);
+      }, 800);
+      return () => clearTimeout(removeTimer);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <BrowserRouter>
+    <>
+      {showEntryLoader && <GlobalAppLoader fadeOut={fadeOut} />}
+      <BrowserRouter>
       <AuthProvider>
         {/* Toast alerts config */}
         <Toaster
@@ -81,6 +100,7 @@ function App() {
         </Suspense>
       </AuthProvider>
     </BrowserRouter>
+    </>
   );
 }
 

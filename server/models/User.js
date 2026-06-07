@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
         },
         'Please add a password',
       ],
-      minlength: [6, 'Password must be at least 6 characters'],
+      minlength: [8, 'Password must be at least 8 characters'],
       select: false, // Prevents password from being returned in queries by default
     },
     avatar: {
@@ -89,10 +89,16 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash password before saving to database
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password') || !this.password) {
-    return next();
+userSchema.pre('save', async function () {
+  if (this.provider === 'google') {
+    console.log(`[User Model] Password hash skipped (Google provider) for user: ${this.email}`);
+    return;
   }
+  if (!this.isModified('password') || !this.password) {
+    console.log(`[User Model] Password hash skipped (not modified/present) for user: ${this.email}`);
+    return;
+  }
+  console.log(`[User Model] Hashing password for user: ${this.email}`);
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
