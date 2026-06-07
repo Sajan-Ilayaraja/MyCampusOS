@@ -87,6 +87,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // OAuth login action
+  const oauthLogin = (userToken) => {
+    localStorage.setItem('token', userToken);
+    setToken(userToken);
+    toast.success('Signed in successfully with Google!');
+  };
+
+  // Update user state action
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
+  };
+
   // Logout action
   const logout = () => {
     handleLogoutCleanup();
@@ -101,6 +113,8 @@ export const AuthProvider = ({ children }) => {
         loading,
         register,
         login,
+        oauthLogin,
+        updateUser,
         logout,
         isAuthenticated: !!user,
       }}

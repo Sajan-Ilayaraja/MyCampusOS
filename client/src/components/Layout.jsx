@@ -83,6 +83,7 @@ const Layout = () => {
     { name: 'Goal Tracker', path: '/goals', icon: Target },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
     { name: 'CampusBuddy', path: '/ai', icon: Sparkles },
+    { name: 'Profile', path: '/profile', icon: User },
   ];
 
   return (
@@ -136,9 +137,17 @@ const Layout = () => {
         {/* User Card & Toggle collapse controls */}
         <div className="border-t border-slate-800/60 bg-[#080d19]/80 flex flex-col gap-3 p-4">
           <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center' : ''}`}>
-            <div className="flex items-center justify-center w-9 h-9 rounded-full bg-slate-800 border border-slate-700 text-indigo-400 shrink-0">
-              <User className="w-5 h-5" />
-            </div>
+            {user?.profileImage || user?.avatar ? (
+              <img
+                src={user.profileImage || user.avatar}
+                alt="Profile"
+                className="w-9 h-9 rounded-full object-cover border border-slate-800 shrink-0"
+              />
+            ) : (
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-slate-800 border border-slate-700 text-indigo-400 shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+            )}
             {!sidebarCollapsed && (
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-white truncate">{user?.name || 'Student'}</p>
@@ -244,9 +253,17 @@ const Layout = () => {
         {/* User Card */}
         <div className="p-4 border-t border-slate-800/60 bg-[#080d19]/80 safe-pb">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-800 border border-slate-700 text-indigo-400 shrink-0">
-              <User className="w-5 h-5" />
-            </div>
+            {user?.profileImage || user?.avatar ? (
+              <img
+                src={user.profileImage || user.avatar}
+                alt="Profile"
+                className="w-10 h-10 rounded-full object-cover border border-slate-800 shrink-0"
+              />
+            ) : (
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-800 border border-slate-700 text-indigo-400 shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+            )}
             <div>
               <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
               <p className="text-xs text-slate-500 truncate">{user?.email}</p>

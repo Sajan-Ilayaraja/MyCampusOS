@@ -16,6 +16,8 @@ const NotesVault = lazy(() => import('./pages/NotesVault'));
 const GoalTracker = lazy(() => import('./pages/GoalTracker'));
 const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard'));
 const AIAssistant = lazy(() => import('./pages/AIAssistant'));
+const OAuthSuccess = lazy(() => import('./pages/OAuthSuccess'));
+const Profile = lazy(() => import('./pages/Profile'));
 
 function App() {
   return (
@@ -57,6 +59,7 @@ function App() {
             {/* Public Auth Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/oauth-success" element={<OAuthSuccess />} />
 
             {/* Protected Main Routes (Require Login) */}
             <Route element={<ProtectedRoute />}>
@@ -68,6 +71,7 @@ function App() {
                 <Route path="/goals" element={<GoalTracker />} />
                 <Route path="/analytics" element={<ErrorBoundary><AnalyticsDashboard /></ErrorBoundary>} />
                 <Route path="/ai" element={<ErrorBoundary><AIAssistant /></ErrorBoundary>} />
+                <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>
 

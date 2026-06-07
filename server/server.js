@@ -40,6 +40,10 @@ try {
 
 const app = express();
 
+const passport = require('passport');
+require('./config/passport');
+app.use(passport.initialize());
+
 // 1. Security Headers & CORS Configuration
 app.use(helmet({
   contentSecurityPolicy: false,
